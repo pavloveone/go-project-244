@@ -1,6 +1,7 @@
 package main
 
 import (
+	"code"
 	"context"
 	"fmt"
 	"os"
@@ -23,6 +24,15 @@ func main() {
 		Usage: "Compares two configuration files and shows a difference.",
 		Flags: flags,
 		Action: func(ctx context.Context, c *cli.Command) error {
+			if c.Args().Len() == 0 {
+				return fmt.Errorf("file paths are required")
+			}
+			paths := c.Args().Slice()
+			out, err := code.ParseByPaths(paths)
+			if err != nil {
+				return err
+			}
+			fmt.Print(out)
 			return nil
 		},
 	}
