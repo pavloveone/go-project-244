@@ -32,7 +32,7 @@ func main() {
 			if err != nil {
 				return err
 			}
-			fmt.Print(out)
+			fmt.Println(out)
 			return nil
 		},
 	}
