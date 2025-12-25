@@ -5,13 +5,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    steps: 
+    steps:
       - uses: actions/checkout@v5
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
+
+      - name: Download dependencies
+        run: go mod download
+
       - name: Build
         run: make build
 
@@ -28,6 +32,9 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
+
+      - name: Download dependencies
+        run: go mod download
 
       - name: Run tests with coverage
         run: go test -v -coverprofile=coverage.out ./...
@@ -48,6 +55,9 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
+
+      - name: Download dependencies
+        run: go mod download
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v4
