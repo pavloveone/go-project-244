@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+// ParseByPaths reads JSON files from the given paths and generates a formatted
+// diff showing the differences between them. It expects exactly two file paths.
+// It returns a string containing the diff output and an error if file reading or
+// parsing fails.
 func ParseByPaths(paths []string) (string, error) {
 	files := make([][]byte, len(paths))
 	for i, path := range paths {
