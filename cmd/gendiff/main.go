@@ -1,7 +1,7 @@
 package main
 
 import (
-	"code"
+	"code/internal/parsers"
 	"context"
 	"fmt"
 	"os"
@@ -28,7 +28,7 @@ func main() {
 				return fmt.Errorf("file paths are required")
 			}
 			paths := c.Args().Slice()
-			out, err := code.ParseByPaths(paths)
+			out, err := parsers.ParseByPaths(paths)
 			if err != nil {
 				return err
 			}
