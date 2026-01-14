@@ -1,7 +1,7 @@
 package parsers
 
 import (
-	"code/internal/code"
+	"code"
 	"code/internal/models"
 	"fmt"
 	"os"
