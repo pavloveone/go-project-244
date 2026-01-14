@@ -28,7 +28,7 @@ func TestGenDiff(t *testing.T) {
 				{Content: []byte(`{"key": "old"}`), Format: ".json"},
 				{Content: []byte(`{"key": "new"}`), Format: ".json"},
 			},
-			want: "{\n  - key: old\n  + key: new\n}",
+			want: "{\n  - key: \"old\"\n  + key: \"new\"\n}",
 		},
 		{
 			name: "empty objects",
@@ -132,6 +132,112 @@ func TestPrintDiff(t *testing.T) {
 			r := require.New(t)
 
 			got := printDiff(tt.sep, tt.key, tt.val)
+			r.Equal(tt.want, got)
+		})
+	}
+}
+
+func TestGenDiffNested(t *testing.T) {
+	tests := []struct {
+		name    string
+		files   []models.FileData
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "nested structures simple",
+			files: []models.FileData{
+				{Content: []byte(`{"a": {"b": 1}}`), Format: ".json"},
+				{Content: []byte(`{"a": {"b": 2}}`), Format: ".json"},
+			},
+			want: `{
+    a: {
+      - b: 1
+      + b: 2
+    }
+}`,
+		},
+		{
+			name: "nested with added key",
+			files: []models.FileData{
+				{Content: []byte(`{"a": {"b": 1}}`), Format: ".json"},
+				{Content: []byte(`{"a": {"b": 1, "c": 2}}`), Format: ".json"},
+			},
+			want: `{
+    a: {
+        b: 1
+      + c: 2
+    }
+}`,
+		},
+		{
+			name: "nested with removed key",
+			files: []models.FileData{
+				{Content: []byte(`{"a": {"b": 1, "c": 2}}`), Format: ".json"},
+				{Content: []byte(`{"a": {"b": 1}}`), Format: ".json"},
+			},
+			want: `{
+    a: {
+        b: 1
+      - c: 2
+    }
+}`,
+		},
+		{
+			name: "nested to non-nested",
+			files: []models.FileData{
+				{Content: []byte(`{"a": {"b": 1}}`), Format: ".json"},
+				{Content: []byte(`{"a": "string"}`), Format: ".json"},
+			},
+			want: `{
+  - a: {
+        b: 1
+    }
+  + a: "string"
+}`,
+		},
+		{
+			name: "non-nested to nested",
+			files: []models.FileData{
+				{Content: []byte(`{"a": "string"}`), Format: ".json"},
+				{Content: []byte(`{"a": {"b": 1}}`), Format: ".json"},
+			},
+			want: `{
+  - a: "string"
+  + a: {
+        b: 1
+    }
+}`,
+		},
+		{
+			name: "deep nesting",
+			files: []models.FileData{
+				{Content: []byte(`{"a": {"b": {"c": 1}}}`), Format: ".json"},
+				{Content: []byte(`{"a": {"b": {"c": 2}}}`), Format: ".json"},
+			},
+			want: `{
+    a: {
+        b: {
+          - c: 1
+          + c: 2
+        }
+    }
+}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := require.New(t)
+
+			got, err := GetDiff(tt.files)
+
+			if tt.wantErr {
+				r.Error(err)
+				return
+			}
+
+			r.NoError(err)
 			r.Equal(tt.want, got)
 		})
 	}

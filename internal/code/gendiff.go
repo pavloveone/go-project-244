@@ -1,11 +1,11 @@
 package code
 
 import (
+	"code/internal/formatters"
 	"code/internal/models"
 	"encoding/json"
 	"fmt"
 	"sort"
-	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -13,13 +13,15 @@ import (
 // GetDiff generates a formatted diff string comparing two configuration files.
 // It accepts a slice of FileData containing file contents and their formats.
 // The function parses each file according to its format (JSON or YAML),
-// compares their key-value pairs, and returns a formatted string showing:
+// compares their key-value pairs recursively, and returns a formatted string
+// using the stylish formatter showing:
 //   - Keys that were removed (prefixed with "- ")
 //   - Keys that were added (prefixed with "+ ")
 //   - Keys that were modified (shown as both removed and added)
 //   - Keys that remain unchanged (prefixed with "  ")
+//   - Nested structures are properly indented
 //
-// The output is sorted alphabetically by key names.
+// The output is sorted alphabetically by key names at each level.
 // Returns an error if file parsing fails.
 func GetDiff(filesData []models.FileData) (string, error) {
 	maps := make([]map[string]any, len(filesData))
@@ -29,40 +31,94 @@ func GetDiff(filesData []models.FileData) (string, error) {
 			return "", err
 		}
 	}
-	keys := make(map[string]struct{})
-	for _, m := range maps {
-		for k := range m {
-			keys[k] = struct{}{}
-		}
-	}
-	sortedKey := make([]string, 0, len(keys))
-	for k := range keys {
-		sortedKey = append(sortedKey, k)
-	}
-	sort.Strings(sortedKey)
 
 	old, new := maps[0], maps[1]
-	var s strings.Builder
-	s.WriteString("{\n")
-	for _, key := range sortedKey {
+	diffTree := BuildDiffTree(old, new)
+	return formatters.FormatStylish(diffTree), nil
+}
+
+// BuildDiffTree recursively builds a diff tree comparing two maps.
+// It analyzes the keys present in both maps and creates a slice of DiffNode
+// representing the differences. The function handles:
+//   - Added keys (present only in the new map)
+//   - Removed keys (present only in the old map)
+//   - Changed values (same key, different non-map values)
+//   - Unchanged values (same key and value)
+//   - Nested structures (same key with map values in both - recursively compared)
+//
+// Keys are sorted alphabetically at each level to ensure consistent output.
+// Returns a slice of DiffNode representing the complete diff tree.
+func BuildDiffTree(old, new map[string]any) []models.DiffNode {
+	keys := make(map[string]struct{})
+	for k := range old {
+		keys[k] = struct{}{}
+	}
+	for k := range new {
+		keys[k] = struct{}{}
+	}
+
+	sortedKeys := make([]string, 0, len(keys))
+	for k := range keys {
+		sortedKeys = append(sortedKeys, k)
+	}
+	sort.Strings(sortedKeys)
+
+	nodes := make([]models.DiffNode, 0, len(sortedKeys))
+	for _, key := range sortedKeys {
 		oldVal, inOld := old[key]
 		newVal, inNew := new[key]
 
+		node := models.DiffNode{Key: key}
+
 		switch {
 		case inOld && !inNew:
-			s.WriteString(printDiff("- ", key, oldVal))
+			node.Type = models.NodeTypeRemoved
+			node.OldValue = oldVal
+
 		case !inOld && inNew:
-			s.WriteString(printDiff("+ ", key, newVal))
-		case fmt.Sprintf("%v", oldVal) != fmt.Sprintf("%v", newVal):
-			s.WriteString(printDiff("- ", key, oldVal))
-			s.WriteString(printDiff("+ ", key, newVal))
-		default:
-			s.WriteString(printDiff("  ", key, oldVal))
+			node.Type = models.NodeTypeAdded
+			node.NewValue = newVal
+
+		case inOld && inNew:
+			oldMap, oldIsMap := oldVal.(map[string]any)
+			newMap, newIsMap := newVal.(map[string]any)
+
+			if oldIsMap && newIsMap {
+				node.Type = models.NodeTypeNested
+				node.Children = BuildDiffTree(oldMap, newMap)
+			} else if !valuesEqual(oldVal, newVal) {
+				node.Type = models.NodeTypeChanged
+				node.OldValue = oldVal
+				node.NewValue = newVal
+			} else {
+				node.Type = models.NodeTypeUnchanged
+				node.OldValue = oldVal
+			}
 		}
 
+		nodes = append(nodes, node)
 	}
-	s.WriteString("}")
-	return s.String(), nil
+
+	return nodes
+}
+
+func valuesEqual(a, b any) bool {
+	aMap, aIsMap := a.(map[string]any)
+	bMap, bIsMap := b.(map[string]any)
+	if aIsMap && bIsMap {
+		if len(aMap) != len(bMap) {
+			return false
+		}
+		for k, v := range aMap {
+			bv, ok := bMap[k]
+			if !ok || !valuesEqual(v, bv) {
+				return false
+			}
+		}
+		return true
+	}
+
+	return a == b
 }
 
 func printDiff(sep, key string, val any) string {
