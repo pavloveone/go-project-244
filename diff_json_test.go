@@ -161,7 +161,7 @@ func TestGenDiffJSON(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := require.New(t)
 
-			got, err := GenDiff(tt.files, "json")
+			got, err := GenDiffFromData(tt.files, "json")
 
 			if tt.wantErr {
 				r.Error(err)
@@ -185,7 +185,7 @@ func TestJSONFormatterValidOutput(t *testing.T) {
 		{Content: []byte(`{"common":{"follow":false,"setting1":"Value 1","setting3":null,"setting4":"blah blah","setting5":{"key5":"value5"},"setting6":{"key":"value","ops":"vops","doge":{"wow":"so much"}}},"group1":{"foo":"bar","baz":"bars","nest":"str"},"group3":{"deep":{"id":{"number":45}},"fee":100500}}`), Format: ".json"},
 	}
 
-	got, err := GenDiff(files, "json")
+	got, err := GenDiffFromData(files, "json")
 	require.NoError(t, err)
 
 	var result any

@@ -5,12 +5,65 @@ import (
 	"code/internal/models"
 	"encoding/json"
 	"fmt"
+	"os"
 	"sort"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
 
-// GenDiff generates a formatted diff string comparing two configuration files.
+// GenDiff generates a formatted diff string comparing two configuration files by their paths.
+// This is the main exported function for external use.
+//
+// Parameters:
+//   - filepath1: path to the first configuration file
+//   - filepath2: path to the second configuration file
+//   - format: output format ("stylish", "plain", or "json")
+//
+// Returns:
+//   - formatted diff string
+//   - error if file reading, parsing, or formatting fails
+func GenDiff(filepath1, filepath2, format string) (string, error) {
+	// Read files
+	data1, err := os.ReadFile(filepath1)
+	if err != nil {
+		return "", err
+	}
+	data2, err := os.ReadFile(filepath2)
+	if err != nil {
+		return "", err
+	}
+
+	// Detect formats
+	format1, err := detectFormat(filepath1)
+	if err != nil {
+		return "", err
+	}
+	format2, err := detectFormat(filepath2)
+	if err != nil {
+		return "", err
+	}
+
+	// Create FileData structures
+	filesData := []models.FileData{
+		{Content: data1, Format: format1},
+		{Content: data2, Format: format2},
+	}
+
+	return GenDiffFromData(filesData, format)
+}
+
+func detectFormat(path string) (string, error) {
+	formats := []string{".json", ".yaml", ".yml"}
+	for _, f := range formats {
+		if strings.HasSuffix(path, f) {
+			return f, nil
+		}
+	}
+	return "", fmt.Errorf("format has no support")
+}
+
+// GenDiffFromData generates a formatted diff string comparing two configuration files.
 // It accepts a slice of FileData containing file contents and their formats,
 // and a format string specifying the output format.
 // The function parses each file according to its format (JSON or YAML),
@@ -19,10 +72,11 @@ import (
 // Supported output formats:
 //   - "stylish": Hierarchical format with indentation and markers
 //   - "plain": Flat text format with property paths
+//   - "json": JSON format for programmatic processing
 //
 // The output is sorted alphabetically by key names at each level.
 // Returns an error if file parsing or formatting fails.
-func GenDiff(filesData []models.FileData, format string) (string, error) {
+func GenDiffFromData(filesData []models.FileData, format string) (string, error) {
 	maps := make([]map[string]any, len(filesData))
 	for i, fd := range filesData {
 		maps[i] = make(map[string]any)
