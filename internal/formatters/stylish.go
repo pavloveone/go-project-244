@@ -81,6 +81,10 @@ func formatValue(value any, depth int) string {
 		return formatMap(m, depth)
 	}
 
+	if s, ok := value.(string); ok {
+		return s
+	}
+
 	bytes, err := json.Marshal(value)
 	if err != nil {
 		return fmt.Sprintf("%v", value)
