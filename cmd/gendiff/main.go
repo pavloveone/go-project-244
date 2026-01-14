@@ -13,7 +13,7 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		Name:    "format",
 		Aliases: []string{"f"},
-		Usage:   "output format (stylish, plain)",
+		Usage:   "output format (stylish, plain, json)",
 		Value:   "stylish",
 	},
 }

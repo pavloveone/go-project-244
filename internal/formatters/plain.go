@@ -41,11 +41,9 @@ func formatPlainNodes(nodes []models.DiffNode, parentPath string) []string {
 				path, formatPlainValue(node.OldValue), formatPlainValue(node.NewValue)))
 
 		case models.NodeTypeNested:
-			// For nested nodes, recurse into children
 			childLines := formatPlainNodes(node.Children, path)
 			lines = append(lines, childLines...)
 
-		// NodeTypeUnchanged - skip, don't output
 		}
 	}
 

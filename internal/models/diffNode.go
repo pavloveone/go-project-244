@@ -18,9 +18,9 @@ const (
 
 // DiffNode represents a single node in the diff tree
 type DiffNode struct {
-	Key      string
-	Type     NodeType
-	OldValue any
-	NewValue any
-	Children []DiffNode
+	Key      string      `json:"key"`
+	Type     NodeType    `json:"type"`
+	OldValue any         `json:"oldValue,omitempty"`
+	NewValue any         `json:"newValue,omitempty"`
+	Children []DiffNode  `json:"children,omitempty"`
 }
