@@ -76,7 +76,7 @@ func TestGenDiff(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := require.New(t)
 
-			got, err := GetDiff(tt.files)
+			got, err := GetDiff(tt.files, "stylish")
 
 			if tt.wantErr {
 				r.Error(err)
@@ -230,7 +230,7 @@ func TestGenDiffNested(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := require.New(t)
 
-			got, err := GetDiff(tt.files)
+			got, err := GetDiff(tt.files, "stylish")
 
 			if tt.wantErr {
 				r.Error(err)

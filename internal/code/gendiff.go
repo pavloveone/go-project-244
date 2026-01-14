@@ -11,19 +11,18 @@ import (
 )
 
 // GetDiff generates a formatted diff string comparing two configuration files.
-// It accepts a slice of FileData containing file contents and their formats.
+// It accepts a slice of FileData containing file contents and their formats,
+// and a format string specifying the output format.
 // The function parses each file according to its format (JSON or YAML),
-// compares their key-value pairs recursively, and returns a formatted string
-// using the stylish formatter showing:
-//   - Keys that were removed (prefixed with "- ")
-//   - Keys that were added (prefixed with "+ ")
-//   - Keys that were modified (shown as both removed and added)
-//   - Keys that remain unchanged (prefixed with "  ")
-//   - Nested structures are properly indented
+// compares their key-value pairs recursively, and returns a formatted string.
+//
+// Supported output formats:
+//   - "stylish": Hierarchical format with indentation and markers
+//   - "plain": Flat text format with property paths
 //
 // The output is sorted alphabetically by key names at each level.
-// Returns an error if file parsing fails.
-func GetDiff(filesData []models.FileData) (string, error) {
+// Returns an error if file parsing or formatting fails.
+func GetDiff(filesData []models.FileData, format string) (string, error) {
 	maps := make([]map[string]any, len(filesData))
 	for i, fd := range filesData {
 		maps[i] = make(map[string]any)
@@ -34,7 +33,7 @@ func GetDiff(filesData []models.FileData) (string, error) {
 
 	old, new := maps[0], maps[1]
 	diffTree := BuildDiffTree(old, new)
-	return formatters.FormatStylish(diffTree), nil
+	return formatters.Format(diffTree, format)
 }
 
 // BuildDiffTree recursively builds a diff tree comparing two maps.

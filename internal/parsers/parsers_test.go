@@ -180,7 +180,7 @@ func TestParseByPaths(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := require.New(t)
 
-			got, err := ParseByPaths(tt.paths)
+			got, err := ParseByPaths(tt.paths, "stylish")
 
 			if tt.wantErr {
 				r.Error(err)

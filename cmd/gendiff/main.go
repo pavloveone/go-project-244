@@ -11,10 +11,10 @@ import (
 
 var flags = []cli.Flag{
 	&cli.StringFlag{
-		Name:        "format",
-		Aliases:     []string{"f"},
-		Usage:       "output format",
-		DefaultText: `"stylish"`,
+		Name:    "format",
+		Aliases: []string{"f"},
+		Usage:   "output format (stylish, plain)",
+		Value:   "stylish",
 	},
 }
 
@@ -28,7 +28,8 @@ func main() {
 				return fmt.Errorf("file paths are required")
 			}
 			paths := c.Args().Slice()
-			out, err := parsers.ParseByPaths(paths)
+			format := c.String("format")
+			out, err := parsers.ParseByPaths(paths, format)
 			if err != nil {
 				return err
 			}

@@ -2,4 +2,4 @@
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=pavloveone_go-project-244&metric=coverage)](https://sonarcloud.io/summary/new_code?id=pavloveone_go-project-244)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pavloveone_go-project-244&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=pavloveone_go-project-244)
 
-[![asciinema demo](https://asciinema.org/a/FgvgZYalJBy35x5TZg9dtDj4v.svg)](https://asciinema.org/a/FgvgZYalJBy35x5TZg9dtDj4v)
+[![asciinema demo](https://asciinema.org/a/5TfiS14Aey7CURpY.svg)](https://asciinema.org/a/5TfiS14Aey7CURpY)
