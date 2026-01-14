@@ -10,7 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// GetDiff generates a formatted diff string comparing two configuration files.
+// GenDiff generates a formatted diff string comparing two configuration files.
 // It accepts a slice of FileData containing file contents and their formats,
 // and a format string specifying the output format.
 // The function parses each file according to its format (JSON or YAML),
@@ -22,7 +22,7 @@ import (
 //
 // The output is sorted alphabetically by key names at each level.
 // Returns an error if file parsing or formatting fails.
-func GetDiff(filesData []models.FileData, format string) (string, error) {
+func GenDiff(filesData []models.FileData, format string) (string, error) {
 	maps := make([]map[string]any, len(filesData))
 	for i, fd := range filesData {
 		maps[i] = make(map[string]any)

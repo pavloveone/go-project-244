@@ -29,7 +29,7 @@ func ParseByPaths(paths []string, format string) (string, error) {
 		}
 		filesData[i] = models.FileData{Content: data, Format: fileFormat}
 	}
-	out, err := code.GetDiff(filesData, format)
+	out, err := code.GenDiff(filesData, format)
 	if err != nil {
 		return "", err
 	}
