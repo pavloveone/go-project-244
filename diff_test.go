@@ -28,7 +28,7 @@ func TestGenDiffFromData(t *testing.T) {
 				{Content: []byte(`{"key": "old"}`), Format: ".json"},
 				{Content: []byte(`{"key": "new"}`), Format: ".json"},
 			},
-			want: "{\n  - key: \"old\"\n  + key: \"new\"\n}",
+			want: "{\n  - key: old\n  + key: new\n}",
 		},
 		{
 			name: "empty objects",
@@ -193,7 +193,7 @@ func TestGenDiffNested(t *testing.T) {
   - a: {
         b: 1
     }
-  + a: "string"
+  + a: string
 }`,
 		},
 		{
@@ -203,7 +203,7 @@ func TestGenDiffNested(t *testing.T) {
 				{Content: []byte(`{"a": {"b": 1}}`), Format: ".json"},
 			},
 			want: `{
-  - a: "string"
+  - a: string
   + a: {
         b: 1
     }

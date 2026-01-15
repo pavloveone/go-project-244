@@ -5,23 +5,51 @@ import (
 	"encoding/json"
 )
 
-// FormatJSON formats a diff tree in JSON format.
-// It takes a slice of DiffNode representing the internal diff tree structure
-// and returns a JSON string representation of the entire diff tree.
-// The JSON output preserves the hierarchical structure of the diff,
-// including node types, keys, values, and children.
-//
-// This format is useful for:
-//   - Programmatic processing of diff results
-//   - Integration with other tools and systems
-//   - Storing diff results in a structured format
-//   - Further analysis or transformation
-//
-// The output is pretty-printed with 2-space indentation for readability.
 func FormatJSON(nodes []models.DiffNode) (string, error) {
-	bytes, err := json.MarshalIndent(nodes, "", "  ")
+	result := nodesToMap(nodes)
+	bytes, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
 		return "", err
 	}
 	return string(bytes), nil
+}
+
+func nodesToMap(nodes []models.DiffNode) map[string]any {
+	result := make(map[string]any)
+	for _, node := range nodes {
+		result[node.Key] = nodeToValue(node)
+	}
+	return result
+}
+
+func nodeToValue(node models.DiffNode) any {
+	switch node.Type {
+	case models.NodeTypeAdded:
+		return map[string]any{
+			"type":  "added",
+			"value": node.NewValue,
+		}
+	case models.NodeTypeRemoved:
+		return map[string]any{
+			"type":  "removed",
+			"value": node.OldValue,
+		}
+	case models.NodeTypeChanged:
+		return map[string]any{
+			"type":     "changed",
+			"oldValue": node.OldValue,
+			"newValue": node.NewValue,
+		}
+	case models.NodeTypeUnchanged:
+		return map[string]any{
+			"type":  "unchanged",
+			"value": node.OldValue,
+		}
+	case models.NodeTypeNested:
+		return map[string]any{
+			"type":     "nested",
+			"children": nodesToMap(node.Children),
+		}
+	}
+	return nil
 }

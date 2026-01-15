@@ -21,13 +21,12 @@ func TestGenDiffJSON(t *testing.T) {
 				{Content: []byte(`{}`), Format: ".json"},
 				{Content: []byte(`{"a": 1}`), Format: ".json"},
 			},
-			want: `[
-  {
-    "key": "a",
+			want: `{
+  "a": {
     "type": "added",
-    "newValue": 1
+    "value": 1
   }
-]`,
+}`,
 		},
 		{
 			name: "simple property removed",
@@ -35,13 +34,12 @@ func TestGenDiffJSON(t *testing.T) {
 				{Content: []byte(`{"a": 1}`), Format: ".json"},
 				{Content: []byte(`{}`), Format: ".json"},
 			},
-			want: `[
-  {
-    "key": "a",
+			want: `{
+  "a": {
     "type": "removed",
-    "oldValue": 1
+    "value": 1
   }
-]`,
+}`,
 		},
 		{
 			name: "property unchanged",
@@ -49,13 +47,12 @@ func TestGenDiffJSON(t *testing.T) {
 				{Content: []byte(`{"a": 1}`), Format: ".json"},
 				{Content: []byte(`{"a": 1}`), Format: ".json"},
 			},
-			want: `[
-  {
-    "key": "a",
+			want: `{
+  "a": {
     "type": "unchanged",
-    "oldValue": 1
+    "value": 1
   }
-]`,
+}`,
 		},
 		{
 			name: "property changed",
@@ -63,14 +60,13 @@ func TestGenDiffJSON(t *testing.T) {
 				{Content: []byte(`{"a": 1}`), Format: ".json"},
 				{Content: []byte(`{"a": 2}`), Format: ".json"},
 			},
-			want: `[
-  {
-    "key": "a",
+			want: `{
+  "a": {
     "type": "changed",
     "oldValue": 1,
     "newValue": 2
   }
-]`,
+}`,
 		},
 		{
 			name: "nested structure",
@@ -78,20 +74,18 @@ func TestGenDiffJSON(t *testing.T) {
 				{Content: []byte(`{"a": {"b": 1}}`), Format: ".json"},
 				{Content: []byte(`{"a": {"b": 2}}`), Format: ".json"},
 			},
-			want: `[
-  {
-    "key": "a",
+			want: `{
+  "a": {
     "type": "nested",
-    "children": [
-      {
-        "key": "b",
+    "children": {
+      "b": {
         "type": "changed",
         "oldValue": 1,
         "newValue": 2
       }
-    ]
+    }
   }
-]`,
+}`,
 		},
 		{
 			name: "multiple changes",
@@ -99,29 +93,25 @@ func TestGenDiffJSON(t *testing.T) {
 				{Content: []byte(`{"a": 1, "b": 2, "c": 3}`), Format: ".json"},
 				{Content: []byte(`{"a": 1, "b": 20, "d": 4}`), Format: ".json"},
 			},
-			want: `[
-  {
-    "key": "a",
+			want: `{
+  "a": {
     "type": "unchanged",
-    "oldValue": 1
+    "value": 1
   },
-  {
-    "key": "b",
+  "b": {
     "type": "changed",
     "oldValue": 2,
     "newValue": 20
   },
-  {
-    "key": "c",
+  "c": {
     "type": "removed",
-    "oldValue": 3
+    "value": 3
   },
-  {
-    "key": "d",
+  "d": {
     "type": "added",
-    "newValue": 4
+    "value": 4
   }
-]`,
+}`,
 		},
 		{
 			name: "different value types",
@@ -129,31 +119,28 @@ func TestGenDiffJSON(t *testing.T) {
 				{Content: []byte(`{"str": "hello", "num": 42, "bool": true, "null": null}`), Format: ".json"},
 				{Content: []byte(`{"str": "world", "num": 43, "bool": false, "null": "value"}`), Format: ".json"},
 			},
-			want: `[
-  {
-    "key": "bool",
+			want: `{
+  "bool": {
     "type": "changed",
     "oldValue": true,
     "newValue": false
   },
-  {
-    "key": "null",
+  "null": {
     "type": "changed",
+    "oldValue": null,
     "newValue": "value"
   },
-  {
-    "key": "num",
+  "num": {
     "type": "changed",
     "oldValue": 42,
     "newValue": 43
   },
-  {
-    "key": "str",
+  "str": {
     "type": "changed",
     "oldValue": "hello",
     "newValue": "world"
   }
-]`,
+}`,
 		},
 	}
 
@@ -192,7 +179,7 @@ func TestJSONFormatterValidOutput(t *testing.T) {
 	err = json.Unmarshal([]byte(got), &result)
 	require.NoError(t, err, "Output should be valid JSON")
 
-	arr, ok := result.([]any)
-	require.True(t, ok, "Root element should be an array")
-	require.NotEmpty(t, arr, "Array should not be empty")
+	obj, ok := result.(map[string]any)
+	require.True(t, ok, "Root element should be an object")
+	require.NotEmpty(t, obj, "Object should not be empty")
 }
