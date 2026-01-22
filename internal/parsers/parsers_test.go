@@ -54,6 +54,21 @@ func TestParseByPaths(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "empty paths",
+			paths:   []string{},
+			wantErr: true,
+		},
+		{
+			name:    "single path",
+			paths:   []string{"../../testdata/fixture/file1.json"},
+			wantErr: true,
+		},
+		{
+			name:    "too many paths",
+			paths:   []string{"../../testdata/fixture/file1.json", "../../testdata/fixture/file2.json", "../../testdata/fixture/empty.json"},
+			wantErr: true,
+		},
+		{
 			name:  "identical yaml files",
 			paths: []string{"../../testdata/fixture/file1.yaml", "../../testdata/fixture/file1.yaml"},
 			want:  "{\n    follow: false\n    host: hexlet.io\n    proxy: 123.234.53.22\n    timeout: 50\n}",
