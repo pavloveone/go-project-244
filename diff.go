@@ -50,7 +50,7 @@ func GenDiff(filepath1, filepath2, format string) (string, error) {
 		{Content: data2, Format: format2},
 	}
 
-	return GenDiffFromData(filesData, format)
+	return genDiffFromData(filesData, format)
 }
 
 func detectFormat(path string) (string, error) {
@@ -76,7 +76,7 @@ func detectFormat(path string) (string, error) {
 //
 // The output is sorted alphabetically by key names at each level.
 // Returns an error if file parsing or formatting fails.
-func GenDiffFromData(filesData []models.FileData, format string) (string, error) {
+func genDiffFromData(filesData []models.FileData, format string) (string, error) {
 	maps := make([]map[string]any, len(filesData))
 	for i, fd := range filesData {
 		maps[i] = make(map[string]any)
@@ -86,11 +86,11 @@ func GenDiffFromData(filesData []models.FileData, format string) (string, error)
 	}
 
 	old, new := maps[0], maps[1]
-	diffTree := BuildDiffTree(old, new)
+	diffTree := buildDiffTree(old, new)
 	return formatters.Format(diffTree, format)
 }
 
-// BuildDiffTree recursively builds a diff tree comparing two maps.
+// buildDiffTree recursively builds a diff tree comparing two maps.
 // It analyzes the keys present in both maps and creates a slice of DiffNode
 // representing the differences. The function handles:
 //   - Added keys (present only in the new map)
@@ -101,7 +101,7 @@ func GenDiffFromData(filesData []models.FileData, format string) (string, error)
 //
 // Keys are sorted alphabetically at each level to ensure consistent output.
 // Returns a slice of DiffNode representing the complete diff tree.
-func BuildDiffTree(old, new map[string]any) []models.DiffNode {
+func buildDiffTree(old, new map[string]any) []models.DiffNode {
 	keys := make(map[string]struct{})
 	for k := range old {
 		keys[k] = struct{}{}
@@ -138,7 +138,7 @@ func BuildDiffTree(old, new map[string]any) []models.DiffNode {
 
 			if oldIsMap && newIsMap {
 				node.Type = models.NodeTypeNested
-				node.Children = BuildDiffTree(oldMap, newMap)
+				node.Children = buildDiffTree(oldMap, newMap)
 			} else if !valuesEqual(oldVal, newVal) {
 				node.Type = models.NodeTypeChanged
 				node.OldValue = oldVal

@@ -2,10 +2,7 @@ package parsers
 
 import (
 	"code"
-	"code/internal/models"
 	"fmt"
-	"os"
-	"strings"
 )
 
 // ParseByPaths reads JSON or YAML files from the given paths and generates a formatted
@@ -17,31 +14,8 @@ import (
 // It returns a string containing the diff output and an error if file reading,
 // parsing, or formatting fails.
 func ParseByPaths(paths []string, format string) (string, error) {
-	filesData := make([]models.FileData, len(paths))
-	for i, path := range paths {
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return "", err
-		}
-		fileFormat, err := detectFormat(path)
-		if err != nil {
-			return "", err
-		}
-		filesData[i] = models.FileData{Content: data, Format: fileFormat}
+	if len(paths) != 2 {
+		return "", fmt.Errorf("expected exactly 2 paths, got %d", len(paths))
 	}
-	out, err := code.GenDiffFromData(filesData, format)
-	if err != nil {
-		return "", err
-	}
-	return out, nil
-}
-
-func detectFormat(path string) (string, error) {
-	var formats = []string{".json", ".yaml", ".yml"}
-	for _, f := range formats {
-		if strings.HasSuffix(path, f) {
-			return f, nil
-		}
-	}
-	return "", fmt.Errorf("format has no support")
+	return code.GenDiff(paths[0], paths[1], format)
 }

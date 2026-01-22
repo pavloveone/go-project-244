@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGenDiffFromData(t *testing.T) {
+func TestGenDiff(t *testing.T) {
 	tests := []struct {
 		name    string
 		files   []models.FileData
@@ -76,7 +76,7 @@ func TestGenDiffFromData(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := require.New(t)
 
-			got, err := GenDiffFromData(tt.files, "stylish")
+			got, err := genDiffFromData(tt.files, "stylish")
 
 			if tt.wantErr {
 				r.Error(err)
@@ -230,7 +230,7 @@ func TestGenDiffNested(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := require.New(t)
 
-			got, err := GenDiffFromData(tt.files, "stylish")
+			got, err := genDiffFromData(tt.files, "stylish")
 
 			if tt.wantErr {
 				r.Error(err)

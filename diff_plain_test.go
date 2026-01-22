@@ -145,7 +145,7 @@ Property 'group3' was added with value: [complex value]`,
 		t.Run(tt.name, func(t *testing.T) {
 			r := require.New(t)
 
-			got, err := GenDiffFromData(tt.files, "plain")
+			got, err := genDiffFromData(tt.files, "plain")
 
 			if tt.wantErr {
 				r.Error(err)
